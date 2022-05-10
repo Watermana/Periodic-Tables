@@ -26,10 +26,38 @@ async function seat(table_id, reservation_id) {
         });
 }
 
+async function seatReservation(reservation_id) {
+    return knex("reservations")
+        .where({reservation_id})
+        .update({
+            status: "seated"
+        });
+}
+
+async function unSeat(table_id) {
+    return knex("tables")
+        .where({table_id})
+        .update({
+            status: "Free",
+            reservation_id: null
+        });
+}
+
+async function unSeatReservation(reservation_id) {
+    return knex("reservations")
+        .where({reservation_id})
+        .update({
+            status: "finished"
+        });
+}
+
 module.exports = {
     list,
     read,
     readRes,
     create,
     seat,
+    seatReservation,
+    unSeat,
+    unSeatReservation,
 }

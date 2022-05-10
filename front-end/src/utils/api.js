@@ -106,6 +106,21 @@ export async function seatTable(table_id, reservation_id, signal){
   }
 }
 
+export async function unSeatTable(table_id, signal) {
+  const url = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
+  try{
+  const options = {
+    method: "DELETE",
+    body: JSON.stringify({data: {}}),
+    headers,
+    signal
+  }
+  return await fetchJson(url, options, []);
+  } catch(e) {
+    return e;
+  }
+}
+
 export async function createTable(table, signal) {
   const url = new URL(`${API_BASE_URL}/tables`);
   try {

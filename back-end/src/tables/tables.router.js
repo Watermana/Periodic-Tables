@@ -12,10 +12,12 @@ router.route("/")
     .post(controller.create);
 
 router.route("/:table_id")
-    .get(controller.read);
+    .get(controller.read)
+
 
 router.route("/:table_id/seat")
-    .put(controller.seat);
+    .put(controller.seat)
+    .delete(controller.unSeat);
  
 module.exports = router;
  

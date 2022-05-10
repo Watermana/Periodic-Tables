@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { listReservations, listTables } from "../utils/api";
+import { listReservations, listTables, unSeatTable } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 import { today } from "../utils/date-time";
 import {Link, useLocation} from "react-router-dom";
@@ -34,6 +34,16 @@ function Dashboard() {
     return () => abortController.abort();
   }
 
+  async function clickHandler({target}) {
+    const abortController = new AbortController();
+    const resp = window.confirm("Is this table ready to seat new guests? This cannot be undone.");
+    if(resp) {
+      console.log(target.name);
+      await unSeatTable(target.name, abortController.signal);
+      window.location.reload();
+    }
+  }
+
   return (
     <main>
       <h1>Dashboard</h1>
@@ -64,6 +74,9 @@ function Dashboard() {
           <td>{capacity}</td>
           <td data-table-id-status={table.table_id}>{status}</td>
           <td>{reservation_id}</td>
+          <td>
+            <button name={table_id} data-table-id-finish={table.table_id} onClick={clickHandler}>Finish</button>
+          </td>
         </tr>
       )
     })}
@@ -97,9 +110,9 @@ function Dashboard() {
           <td>{reservation_time}</td>
           <td>{people}</td>
           <td>
-            <a href={`/reservations/${reservation_id}/seat`}>
-              <button type="button" className="btn btn-primary">Seat</button>
-            </a>
+            <Link to={`/reservations/${reservation_id}/seat`}>
+              <button className="btn btn-primary">Seat</button>
+            </Link>
           </td>
           <td>
             <Link to={`/reservations/${reservation_id}/edit`}>

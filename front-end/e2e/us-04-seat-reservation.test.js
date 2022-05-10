@@ -195,7 +195,7 @@ describe("US-04 - Seat reservation - E2E", () => {
       });
 
       expect(page.url()).toContain("/dashboard");
-      // expect(page).toMatch(/occupied/i);
+      expect(page).toMatch(/occupied/i);
     });
 
     test("cannot seat reservation at Bar #1", async () => {
@@ -205,14 +205,14 @@ describe("US-04 - Seat reservation - E2E", () => {
           path: ".screenshots/us-04-seat-capacity-reservation-start.png",
           fullPage: true,
         });
-        console.log("test2")
+
         await selectOptionByText(page, "table_id", "Bar #1 - 1");
 
         await page.screenshot({
           path: ".screenshots/us-04-seat-capacity-reservation-submit-before.png",
           fullPage: true,
         });
-        console.log("test3")
+        
         await Promise.all([
           page.click("[type=submit]"),
         ]);
@@ -238,7 +238,7 @@ describe("US-04 - Seat reservation - E2E", () => {
         reservation_time: "13:45",
         people: 4,
       });
-
+      console.log(reservation);
       page = await browser.newPage();
       page.on("console", onPageConsole);
       await page.setViewport({ width: 1920, height: 1080 });
@@ -253,11 +253,11 @@ describe("US-04 - Seat reservation - E2E", () => {
         path: ".screenshots/us-04-dashboard-seat-button-before.png",
         fullPage: true,
       });
-
+      // console.log(reservation.reservation_id);
       const hrefSelector = `[href="/reservations/${reservation.reservation_id}/seat"]`;
 
       await page.waitForSelector(hrefSelector);
-
+      // console.log(await page.waitForSelector(hrefSelector));
       await page.screenshot({
         path: ".screenshots/us-04-dashboard-seat-button-after.png",
         fullPage: true,

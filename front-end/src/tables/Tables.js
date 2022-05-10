@@ -15,10 +15,17 @@ function Tables() {
     
     function changeHandler({ target }) {
         const data = target.value;
+        if(target.name === "capacity") {
         setFormData({
           ...formdata,
-          [target.name]: data
+          [target.name]: parseInt(data)
         })
+        } else {
+            setFormData({
+                ...formdata,
+                [target.name]: data
+              })
+        }
       }
 
       function createHandler(event) {

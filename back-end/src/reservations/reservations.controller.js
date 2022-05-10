@@ -21,6 +21,16 @@ function bodyDataHas(propertyName) {
   };
 }
 
+async function reservationExists(req, res, next) {
+  const { reservation_id } = req.params;
+  const reservation = await service.read(reservation_id);
+  if(reservation) {
+    res.locals.reservation = reservation;
+    return next();
+  }
+  return next({status: 404, message: `reservation_id: ${reservation_id} does not exist.`})
+}
+
 function dateIsFuture(req, res, next){
   const { data: { reservation_date, reservation_time } = {} } = req.body;
   const today = new Date();
@@ -83,14 +93,56 @@ function peopleIsNum(req, res, next) {
   return next();
 }
 
+function statusIsValid(req, res, next) {
+  const {data: {status} = {} } = req.body;
+  if(status !== "booked") {
+    return next({
+      status:400,
+      message: `${status} is invalid.`
+    })
+  }
+  return next();
+}
+
+function statusExists(req, res, next) {
+  const validStatus = ["booked", "seated", "finished", "cancelled"];
+  const {data: {status} = {}} = req.body;
+  if(validStatus.includes(status)) { 
+    return next();
+  }
+  return next({
+    status: 400,
+    message: `status: ${status} is invalid.`
+  })
+}
+
+function statusNotFinished(req, res, next) {
+  const {status} = res.locals.reservation
+  if(status === "finished") {
+    return next({
+      status: 400,
+      message: "Cannot update a finished reservation"
+    })
+  }
+  return next();
+}
+
 //controllers
+
+async function read(req, res) {
+  const reservation = res.locals.reservation;
+  res.json({
+    data: await service.read(reservation.reservation_id)
+  })
+}
 
 async function list(req, res) {
   const {date} = req.query;
   console.log(typeof date);
   if(date) {
-    return res.json({
-      data: await service.listReservationsOnDate(date)
+    const list = await service.listReservationsOnDate(date);
+    return res.status(200).json({
+      data: list
     })
   }
   return res.json({
@@ -106,8 +158,17 @@ async function create(req, res, next) {
   });
 }
 
+async function setStatus(req, res) {
+  const {data: {status} = {} } = req.body;
+  const {reservation_id} = req.params;
+  res.status(200).json({
+    data: await service.setStatus(status, reservation_id)
+  })
+}
+
 module.exports = {
   list: asnycErrorBoundary(list),
+  read: [asnycErrorBoundary(reservationExists), asnycErrorBoundary(read)],
   create: [
     asnycErrorBoundary(bodyDataHas("first_name")),
     asnycErrorBoundary(bodyDataHas("last_name")),
@@ -121,6 +182,14 @@ module.exports = {
     asnycErrorBoundary(dateisNotTuesday),
     asnycErrorBoundary(restarauntIsOpen),
     asnycErrorBoundary(dateIsFuture),
+    asnycErrorBoundary(statusIsValid),
     asnycErrorBoundary(create)
+  ],
+  setStatus: [
+    asnycErrorBoundary(bodyDataHas("status")),
+    asnycErrorBoundary(reservationExists),
+    asnycErrorBoundary(statusExists),
+    asnycErrorBoundary(statusNotFinished),
+    asnycErrorBoundary(setStatus)
   ]
 };
