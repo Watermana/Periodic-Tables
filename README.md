@@ -14,18 +14,18 @@ Users have the ability to create, edit, and cancel restaurant reservations.
 ## Screenshots
 
 Dashboard
-![dashboard](https://gyazo.com/11e691921d5abb7b00bffaf7fd5e57d0)
+![dashboard](https://gyazo.com/11e691921d5abb7b00bffaf7fd5e57d0.png)
 
 New Reservation
-![reservation](https://gyazo.com/88505d85177e1c3325c758b41d9e258f)
+![reservation](https://gyazo.com/88505d85177e1c3325c758b41d9e258f.png)
 
 Seat Reservation
-![seatReservation](https://gyazo.com/30f449f9aefe756bf4803873c9999ee1)
-![seated](https://gyazo.com/1989295b1721770d507b88558682e676)
+![seatReservation](https://gyazo.com/30f449f9aefe756bf4803873c9999ee1.png)
+![seated](https://gyazo.com/1989295b1721770d507b88558682e676.png)
  
 Search
-![search](https://gyazo.com/56ec365fde2ce661d864065e5c077187)
-![searched](https://gyazo.com/b26f2310bb8e422771e6647e1f11688f)
+![search](https://gyazo.com/56ec365fde2ce661d864065e5c077187.png)
+![searched](https://gyazo.com/b26f2310bb8e422771e6647e1f11688f.png)
  
 ## Installation
 
