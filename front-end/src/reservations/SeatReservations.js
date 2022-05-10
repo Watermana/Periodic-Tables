@@ -3,16 +3,17 @@ import ErrorAlert from "../layout/ErrorAlert";
 import {useHistory} from "react-router-dom";
 import {useParams} from "react-router";
 import { listTables, seatTable} from "../utils/api";
+import axios from "axios";
 
 function SeatReservations() {
-    const URL = process.env.REACT_APP_API_BASE_URL;
+    const url = process.env.REACT_APP_API_BASE_URL;
     const {reservation_id} = useParams();
     const [tables, setTables] = useState([]);
     const [tablesError, setTablesError] = useState(null);
     const [selectedTable, setSelectedTable] = useState(null);
     const history = useHistory();
 
-    useEffect(loadTables, [URL]);
+    useEffect(loadTables, [url]);
 
     function loadTables() {
         const abortController = new AbortController();
@@ -30,12 +31,12 @@ function SeatReservations() {
         setSelectedTable(Number(target.value));
     }
 
-    function submitHandler(event) {
+    async function submitHandler(event) {
         event.preventDefault();
-        const abortController = new AbortController();
         try{
             console.log(selectedTable)
-            seatTable(selectedTable, reservation_id, abortController.signal)
+            const API_URL = new URL(`${url}/tables/${selectedTable}/seat`);
+            await axios.put(API_URL, {data: {reservation_id}});
             setTimeout(() => {
                 history.push("/")
             }, 500);
@@ -43,6 +44,7 @@ function SeatReservations() {
             setTablesError(e);
         }
     }
+
 
     console.log(tables);
     return (

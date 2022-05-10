@@ -4,6 +4,7 @@
  */
 import formatReservationDate from "./format-reservation-date";
 import formatReservationTime from "./format-reservation-date";
+import axios from "axios";
 
 const API_BASE_URL =
   process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
@@ -98,9 +99,7 @@ export async function seatTable(table_id, reservation_id, signal){
   console.log("hello");
   const url = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
   try {
-  return await fetchJson(url, {method: 'PUT',
-  body: JSON.stringify({data: {reservation_id}}),
-  headers, signal}, [])
+    return await axios.put(url, {data: {reservation_id}})
   } catch(e) {
     return e;
   }
@@ -109,13 +108,7 @@ export async function seatTable(table_id, reservation_id, signal){
 export async function unSeatTable(table_id, signal) {
   const url = new URL(`${API_BASE_URL}/tables/${table_id}/seat`);
   try{
-  const options = {
-    method: "DELETE",
-    body: JSON.stringify({data: {}}),
-    headers,
-    signal
-  }
-  return await fetchJson(url, options, []);
+    return await axios.delete(url, {data: {}})
   } catch(e) {
     return e;
   }
@@ -124,9 +117,27 @@ export async function unSeatTable(table_id, signal) {
 export async function createTable(table, signal) {
   const url = new URL(`${API_BASE_URL}/tables`);
   try {
-  return await fetchJson(url, {method: 'POST',
-  body: JSON.stringify({data: table}),
-  headers, signal}, [])
+    return await axios.post(url, {data: table});
+  } catch(e) {
+    return e;
+  }
+  
+
+}
+
+export async function updateResStatus(reservation_id, status) {
+  const url = new URL(`${API_BASE_URL}/reservation/${reservation_id}/status`);
+  try{
+    await axios.put(url, {data: {status}})
+  } catch(e) {
+    return e;
+  }
+}
+
+export async function MobleNumberSearch(mobile_number) {
+  const url = new URL(`${API_BASE_URL}/reservations?mobile_number=${mobile_number}`);
+  try{
+    await axios.get(url)
   } catch(e) {
     return e;
   }

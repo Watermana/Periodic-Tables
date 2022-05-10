@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import ErrorAlert from "../layout/ErrorAlert";
-import { createReservation } from "../utils/api";
 import {useHistory} from "react-router-dom";
 import {today} from "../utils/date-time";
+import axios from "axios";
 
-function Reservations() {
+function ReservationsForm({reservation, edit = false}) {
+  const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
     const history = useHistory();
     const DEFAULT_FORM_STATE = {
         first_name: '',
@@ -14,7 +16,7 @@ function Reservations() {
         reservation_time: '',
         people: ''
       };
-      const [formdata, setFormData] = useState(DEFAULT_FORM_STATE);
+      const [formdata, setFormData] = useState(reservation || DEFAULT_FORM_STATE);
       const [reservationsError, setReservationsError] = useState(null);
       const errors = [];
 
@@ -25,7 +27,6 @@ function Reservations() {
         setReservationsError(null);
         const day = date.getDay();
         if(day === 1) {
-          // console.log(formdata.reservation_date, today());
           errors.push("The restaraunt is closed on Tuesday. Please select another day.");
         }
         if(formdata.reservation_date < today()) {
@@ -37,9 +38,13 @@ function Reservations() {
         if(errors.length > 0){
           setReservationsError({message: errors});
         }else {
-        createReservation(formdata, abortController.signal)
-        .then(() => history.push('/dashboard?date=' + formdata.reservation_date))  
-        .then(setFormData(DEFAULT_FORM_STATE));
+          if(edit) {
+            axios.put(`${API_BASE_URL}/reservations/${reservation.reservation_id}`, {data: formdata})
+          } else {
+            axios.post(`${API_BASE_URL}/reservations`, {data: formdata})
+          }
+          history.push('/dashboard?date=' + formdata.reservation_date)
+          setFormData(DEFAULT_FORM_STATE)
           return () => abortController.abort();
         }
         
@@ -50,7 +55,7 @@ function Reservations() {
 
       function changeHandler({ target }) {
         const data = target.value;
-        if(target.name === "people") {
+        if(target.name === "people" && target.value) {
           setFormData({
             ...formdata,
             [target.name]: parseInt(data)
@@ -103,4 +108,4 @@ function Reservations() {
       )
 }
 
-export default Reservations;
+export default ReservationsForm;

@@ -3,6 +3,8 @@ import { listReservations, listTables, unSeatTable } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 import { today } from "../utils/date-time";
 import {Link, useLocation} from "react-router-dom";
+import ReservationsTable from "../reservations/ReservationsTable";
+import TablesTable from "../tables/TablesTable";
 /**
  * Defines the dashboard page.
  * @param date
@@ -34,96 +36,17 @@ function Dashboard() {
     return () => abortController.abort();
   }
 
-  async function clickHandler({target}) {
-    const abortController = new AbortController();
-    const resp = window.confirm("Is this table ready to seat new guests? This cannot be undone.");
-    if(resp) {
-      console.log(target.name);
-      await unSeatTable(target.name, abortController.signal);
-      window.location.reload();
-    }
-  }
-
   return (
     <main>
       <h1>Dashboard</h1>
       <div className="d-md-flex mb-3">
-        <h4 className="mb-0">Reservations for date {date}</h4>
+        <h4 className="mb-0">Reservations for date: {date}</h4>
       </div>
       <ErrorAlert error={reservationsError} />
 
-      <table className="table">
-  <thead>
-    <tr>
-      <th scope="col">ID</th>
-      <th scope="col">Table Name</th>
-      <th scope="col">Capacity</th>
-      <th scope="col">Status</th>
-      <th scope="col">Reservation Seated</th>
-      <th scope="col">Manage</th>
-    </tr>
-  </thead>
+      <TablesTable tables={tables} />
+      <ReservationsTable reservations={reservations} />
 
-  <tbody>
-    {tables.map((table, index) => {
-      const {table_id, table_name, capacity, status, reservation_id}= table;
-      return (
-        <tr key={index}>
-          <td>{table_id}</td>
-          <td>{table_name}</td>
-          <td>{capacity}</td>
-          <td data-table-id-status={table.table_id}>{status}</td>
-          <td>{reservation_id}</td>
-          <td>
-            <button name={table_id} data-table-id-finish={table.table_id} onClick={clickHandler}>Finish</button>
-          </td>
-        </tr>
-      )
-    })}
-  </tbody>
-</table>
-
-      <table className="table">
-  <thead>
-    <tr>
-      <th scope="col">ID</th>
-      <th scope="col">First</th>
-      <th scope="col">Last</th>
-      <th scope="col">Moble Number</th>
-      <th scope="col">Reservation Date</th>
-      <th scope="col">Reservation Time</th>
-      <th scope="col">Guests</th>
-      <th scope="col">Manage</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    {reservations.map((res, index) => {
-      const {reservation_id, first_name, last_name, mobile_number, reservation_date, reservation_time, people}= res;
-      return (
-        <tr key={index}>
-          <td>{reservation_id}</td>
-          <td>{first_name}</td>
-          <td>{last_name}</td>
-          <td>{mobile_number}</td>
-          <td>{reservation_date}</td>
-          <td>{reservation_time}</td>
-          <td>{people}</td>
-          <td>
-            <Link to={`/reservations/${reservation_id}/seat`}>
-              <button className="btn btn-primary">Seat</button>
-            </Link>
-          </td>
-          <td>
-            <Link to={`/reservations/${reservation_id}/edit`}>
-              <button type="button" className="btn btn-secondary">Edit</button>
-            </Link>
-          </td>
-        </tr>
-      )
-    })}
-  </tbody>
-</table>
     </main>
   );
 }
