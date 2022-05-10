@@ -95,12 +95,14 @@ function peopleIsNum(req, res, next) {
 
 function statusIsValid(req, res, next) {
   const {data: {status} = {} } = req.body;
+  if(status) {
   if(status !== "booked") {
     return next({
       status:400,
       message: `${status} is invalid.`
     })
   }
+}
   return next();
 }
 
@@ -137,17 +139,22 @@ async function read(req, res) {
 }
 
 async function list(req, res) {
-  const {date} = req.query;
-  console.log(typeof date);
+  const { date, mobile_number } = req.query;
   if(date) {
-    const list = await service.listReservationsOnDate(date);
-    return res.status(200).json({
-      data: list
-    })
+      return res.status(200).json({
+        data: await service.list(date)
+      })
+  } 
+  else if(mobile_number) {
+      return res.status(200).json({
+        data: await service.list(null, mobile_number)
+      })
+  } 
+  else {
+      return res.json({
+        data: await service.list()
+      });
   }
-  return res.json({
-    data: await service.list(),
-  });
 }
 
 async function create(req, res, next) {
@@ -163,6 +170,16 @@ async function setStatus(req, res) {
   const {reservation_id} = req.params;
   res.status(200).json({
     data: await service.setStatus(status, reservation_id)
+  })
+}
+
+async function update(req, res) {
+  const updatedReservation = {
+    ...req.body.data
+  };
+  const {reservation_id} = res.locals.reservation;
+  res.status(200).json({
+    data: await service.update(updatedReservation, reservation_id)
   })
 }
 
@@ -191,5 +208,21 @@ module.exports = {
     asnycErrorBoundary(statusExists),
     asnycErrorBoundary(statusNotFinished),
     asnycErrorBoundary(setStatus)
+  ],
+  update: [
+    asnycErrorBoundary(reservationExists),
+    asnycErrorBoundary(bodyDataHas("first_name")),
+    asnycErrorBoundary(bodyDataHas("last_name")),
+    asnycErrorBoundary(bodyDataHas("mobile_number")),
+    asnycErrorBoundary(bodyDataHas("reservation_date")),
+    asnycErrorBoundary(bodyDataHas("reservation_time")),
+    asnycErrorBoundary(bodyDataHas("people")),
+    asnycErrorBoundary(peopleIsNum),
+    asyncErrorBoundary(dateIsNotDate),
+    asnycErrorBoundary(timeIsTime),
+    asnycErrorBoundary(dateisNotTuesday),
+    asnycErrorBoundary(restarauntIsOpen),
+    asnycErrorBoundary(dateIsFuture),
+    asnycErrorBoundary(update)
   ]
 };
