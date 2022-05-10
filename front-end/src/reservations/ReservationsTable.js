@@ -40,7 +40,7 @@ export default function ReservationsTable({reservations}) {
       {reservations.map((res, index) => {
         const {reservation_id, first_name, last_name, mobile_number, reservation_date, reservation_time, people, status}= res;
         return (
-          <tr key={index}>
+          <tr key={reservation_id}>
             <td>{reservation_id}</td>
             <td>{first_name}</td>
             <td>{last_name}</td>
@@ -51,12 +51,12 @@ export default function ReservationsTable({reservations}) {
             <td data-reservation-id-status={reservation_id} >{status}</td>
             {status === "booked" &&(<td nowrap={"true"}>
               <Link to={`/reservations/${reservation_id}/seat`}>
-                <button className="btn btn-primary">Seat</button>
+                <button className="btn btn-primary m-1">Seat</button>
               </Link>
               <Link to={`/reservations/${reservation_id}/edit`}>
-                <button type="button" className="btn btn-secondary">Edit</button>
+                <button type="button" className="btn btn-secondary m-1">Edit</button>
               </Link>
-              <button data-reservation-id-cancel={reservation_id} value={reservation_id} className="btn btn-danger" onClick={handleClick}>Cancel</button>
+              <button data-reservation-id-cancel={reservation_id} value={reservation_id} className="btn btn-danger m-1" onClick={handleClick}>Cancel</button>
             </td>)}
           </tr>
         )

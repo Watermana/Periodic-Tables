@@ -1,13 +1,13 @@
 exports.up = function (knex) {
   return knex.schema.createTable("reservations", (table) => {
     table.increments("reservation_id").primary();
-    table.string("first_name");
-    table.string("last_name");
-    table.string("mobile_number");
-    table.date("reservation_date");
-    table.time("reservation_time");
-    table.integer("people");
-    table.string("status").defaultTo("booked");
+    table.string("first_name").notNullable();
+    table.string("last_name").notNullable();
+    table.string("mobile_number").notNullable();
+    table.date("reservation_date").notNullable();
+    table.time("reservation_time").notNullable();
+    table.integer("people").notNullable();
+    table.string("status").defaultTo("booked").notNullable();
     table.timestamps(true, true);
   });
 };
@@ -15,15 +15,3 @@ exports.up = function (knex) {
 exports.down = function (knex) {
   return knex.schema.dropTable("reservations");
 };
-
-
-// {
-//   "first_name": "Frank",
-//   "last_name": "Palicky",
-//   "mobile_number": "202-555-0153",
-//   "reservation_date": "2020-12-30",
-//   "reservation_time": "20:00",
-//   "people": 1,
-//   "created_at": "2020-12-10T08:31:32.326Z",
-//   "updated_at": "2020-12-10T08:31:32.326Z"
-// },

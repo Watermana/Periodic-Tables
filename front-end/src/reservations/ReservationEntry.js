@@ -8,14 +8,16 @@ const history = useHistory();
 
   const handleClick = async() => {
     try{
+      const abortController = new AbortController();
       const resp = window.confirm("Do you want to cancel this reservation? This cannot be undone.")
       if(resp){
         await axios.put(`${URL}/reservations/${reservation.reservation_id}/status`, {data: {status: "cancelled"}});
         history.go(0);
+        return ()=> abortController.abort();
       }
     }
-    catch(error){
-      // No display required
+    catch(e){
+      return e;
     }
     
   }

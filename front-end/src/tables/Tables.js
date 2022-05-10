@@ -2,8 +2,12 @@ import React, {useState} from "react";
 import { useHistory } from "react-router";
 import ErrorAlert from "../layout/ErrorAlert";
 import {createTable} from "../utils/api";
+import axios from "axios";
 
 function Tables() {
+    const API_BASE_URL =
+    process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+
     const DEFAULT_FORM_STATE = {
         table_name: "",
         capacity: 0,
@@ -11,7 +15,6 @@ function Tables() {
     const [formdata, setFormData] = useState(DEFAULT_FORM_STATE)
     const [errors, setErrors] = useState(null);
     const history = useHistory();
-    const errorsArry = [];
     
     function changeHandler({ target }) {
         const data = target.value;
@@ -28,27 +31,19 @@ function Tables() {
         }
       }
 
-      function createHandler(event) {
+      async function createHandler(event) {
           event.preventDefault();
           const abortController = new AbortController();
           try{
               setErrors(null);
               const{table_name, capacity} = formdata;
-              if(table_name.length < 2){
-                  errorsArry.push("Table name must be at least 2 characters")
-              }
-              if(capacity < 1 || isNaN(capacity || !capacity)) {
-                  errorsArry.push("\nTable capacity must be a number that is at least 1")
-              }
-              if(errorsArry.length > 0) {
-                  setErrors({message: errorsArry})
-              } else {
-                createTable(formdata)
-                    .then(setFormData(DEFAULT_FORM_STATE))
-                    .then(history.push("/"))
-              }
+              const url = new URL(`${API_BASE_URL}/tables`)
+              await axios.post(url, {data: formdata})
+              setFormData(DEFAULT_FORM_STATE);
+              history.push("/")
+              return () => abortController.abort();
           } catch(e) {
-              setErrors(e);
+              setErrors(e.response.data.error);
           }
       }
 
@@ -62,16 +57,16 @@ function Tables() {
             <tbody>
               <tr>
                 <td>
-                  <input required id="table_name" name='table_name' onChange={changeHandler} value={formdata.table_name} placeholder="Table Name"/>
+                  <input required className="form-control" id="table_name" name='table_name' onChange={changeHandler} value={formdata.table_name} placeholder="Table Name"/>
                 </td>
                 <td>
-                  <input required id="capacity" name='capacity' onChange={changeHandler} value={formdata.capacity} placeholder="Capacity"/>
+                  <input required className="form-control" type="number" id="capacity" name='capacity' onChange={changeHandler} value={formdata.capacity} placeholder="Capacity"/>
                 </td>
                 <td>
-                  <button type="submit">Create</button>
+                  <button type="submit" className="btn btn-primary">Create</button>
                 </td>
                 <td>
-                  <button type="button" onClick={() => history.goBack()}>Cancel</button>
+                  <button type="button" className="btn btn-danger" onClick={() => history.goBack()}>Cancel</button>
                 </td>
               </tr>
             </tbody>

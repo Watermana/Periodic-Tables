@@ -28,9 +28,10 @@ async function read(reservation_id) {
         .first();
 }
 
-async function create(reservation) {
+async function create(reservation){
     return knex("reservations")
-        .insert(reservation);
+        .insert(reservation)
+        .returning("*").then((createdRecord) => createdRecord[0]);
 }
 
 async function setStatus(status, reservation_id) {

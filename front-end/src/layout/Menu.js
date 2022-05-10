@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
  * @returns {JSX.Element}
  */
 
-function Menu() {
+ function Menu() {
   return (
     <nav className="navbar navbar-dark align-items-start p-0">
       <div className="container-fluid d-flex flex-column p-0">

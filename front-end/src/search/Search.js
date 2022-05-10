@@ -27,10 +27,12 @@ export default function Search() {
 
     return(
         <main>
+            <h1>Search for reservations by mobile number</h1>
             <form onSubmit={submitHandler}>
-                <label htmlFor="mobile_number">Mobile Number</label>
-                <input name="mobile_number" placeholder="Enter a customer's phone number" onChange={changeHandler}/>
-                <button type="submit" className="btn btn-primary">Find</button>
+                <div className="d-flex">
+                <input className="form-control w-50 mt-3 mb-3" name="mobile_number" placeholder="Enter a customer's phone number" onChange={changeHandler}/>
+                <button type="submit" className="btn btn-primary m-3">Find</button>
+                </div>
             </form>
             <ReservationsTable reservations={reservations} />
         </main>

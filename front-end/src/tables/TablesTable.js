@@ -35,14 +35,14 @@ export default function TablesTable({tables}) {
           {tables.map((table, index) => {
             const {table_id, table_name, capacity, status, reservation_id}= table;
             return (
-              <tr key={index}>
+              <tr key={table_id}>
                 <td>{table_id}</td>
                 <td>{table_name}</td>
                 <td>{capacity}</td>
                 <td data-table-id-status={table.table_id}>{status}</td>
                 <td>{reservation_id}</td>
                 <td>
-                  <button className="btn btn-primary" name={table_id} data-table-id-finish={table.table_id} onClick={clickHandler}>Finish</button>
+                  {status === 'occupied' && (<button className="btn btn-primary" name={table_id} data-table-id-finish={table.table_id} onClick={clickHandler}>Finish</button>)}
                 </td>
               </tr>
             )

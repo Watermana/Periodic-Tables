@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { listReservations, listTables, unSeatTable } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import { today } from "../utils/date-time";
-import {Link, useLocation} from "react-router-dom";
+import {Link, useLocation, useHistory} from "react-router-dom";
 import ReservationsTable from "../reservations/ReservationsTable";
 import TablesTable from "../tables/TablesTable";
+import {next, previous, today} from "../utils/date-time";
 /**
  * Defines the dashboard page.
  * @param date
@@ -13,6 +13,7 @@ import TablesTable from "../tables/TablesTable";
  */
 function Dashboard() {
   const URL = process.env.REACT_APP_API_BASE_URL;
+  const history = useHistory();
   const search = useLocation().search;
   const currentDate = new URLSearchParams(search).get("date");
   let date = currentDate || today();
@@ -36,11 +37,25 @@ function Dashboard() {
     return () => abortController.abort();
   }
 
+  const handleForward = () => {
+    history.push(`/dashboard?date=${next(date)}`);
+  };
+  const handleBackwards = () => {
+    history.push(`/dashboard?date=${previous(date)}`);
+  };
+  const handleToday = () => {
+    history.push(`/dashboard?date=${today(date)}`);
+  };
+
+
   return (
     <main>
       <h1>Dashboard</h1>
       <div className="d-md-flex mb-3">
         <h4 className="mb-0">Reservations for date: {date}</h4>
+        <button className="ml-2 btn btn-info" onClick={handleBackwards}>PreviousDate</button>
+          <button className="ml-2 btn btn-info" onClick={handleToday}>Today</button>
+          <button className="ml-2 btn btn-info" onClick={handleForward}>NextDate</button>
       </div>
       <ErrorAlert error={reservationsError} />
 

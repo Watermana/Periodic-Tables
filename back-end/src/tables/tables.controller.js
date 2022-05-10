@@ -62,6 +62,12 @@ function capacityIsNumber(req, res, next) {
             message: "capacity must be a number."
         })
     }
+    if(capacity < 1) {
+        return next({
+            status: 400,
+            message: "capacity must be at least one."
+        })
+    }
     return next();
 }
 
@@ -100,7 +106,7 @@ function reservationNotSeated(req, res, next) {
 
 function tableIsOccupied(req, res, next) {
     const {table} = res.locals;
-    if(table.status === "Occupied") {
+    if(table.status === "occupied") {
         return next()
     }
     return next({
@@ -124,32 +130,34 @@ async function list(req, res) {
     });
 }
 
-async function seat(req, res) {
-    const {table, reservation} = res.locals;
-    // console.log(table, reservation);
-    await service.seat(table.table_id, reservation.reservation_id);
-    await service.seatReservation(reservation.reservation_id);
-    return res.json({data: table});
-}
-
-async function create(req, res) {
-    await service.create(req.body.data);
-    return res.status(201).json({data: req.body.data});
-}
-
-async function unSeat(req, res, next) {
-    const {table_id} = req.params;
+async function seat(req, res, next){
     const table = res.locals.table;
-    if(table.status === "Free") {
-        return next({
-            status:400,
-            message:"This table is not occupied."
-        })
-    }
-    await service.unSeat(table_id)
-    await service.unSeatReservation(table.reservation_id);
-    return res.sendStatus(200);
+    const reservation = res.locals.reservation;
+    const seated = await service.seatTable(table.table_id, reservation.reservation_id);
+    res.status(200).json({data:{seated}});
+  }
+
+async function create(req, res, next) {
+  const { data: { table_name, capacity, reservation_id = null } = {} } = req.body;
+  const newTable = {
+    table_name,
+    capacity,
+    reservation_id,
+    status: reservation_id ? "occupied" : "Free"
+    
+  };
+  
+  const response = await service.create(newTable)
+  res.status(201).json({ data: response });
 }
+
+async function unSeat(req, res, next){
+    const {table_id} = req.params;
+     const table = res.locals.table
+     
+    const yep = await service.unseatTable(table_id, table.reservation_id);
+    res.status(200).json({data: {message: `Seat freed`}});
+  }
 
 module.exports = {
     list: asnycErrorBoundary(list),

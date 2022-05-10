@@ -6,7 +6,7 @@ import axios from "axios";
 
 function ReservationsForm({reservation, edit = false}) {
   const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+  process.env.REACT_APP_API_BASE_URL + "/reservations";
     const history = useHistory();
     const DEFAULT_FORM_STATE = {
         first_name: '',
@@ -17,38 +17,25 @@ function ReservationsForm({reservation, edit = false}) {
         people: ''
       };
       const [formdata, setFormData] = useState(reservation || DEFAULT_FORM_STATE);
-      const [reservationsError, setReservationsError] = useState(null);
-      const errors = [];
+      const [errors, setErrors] = useState(null);
 
-      function createHandler(event) {
+      const handleSubmit = async (event) => {
         event.preventDefault();
         const abortController = new AbortController();
-        const date = new Date(formdata.reservation_date);
-        setReservationsError(null);
-        const day = date.getDay();
-        if(day === 1) {
-          errors.push("The restaraunt is closed on Tuesday. Please select another day.");
-        }
-        if(formdata.reservation_date < today()) {
-          errors.push("\n cannot make a reservation in the past.")
-        }
-        if(formdata.reservation_time > "21:30:00" || formdata.reservation_time < "10:30:00") {
-          errors.push("Reservations are between 10:30AM and 9:30PM. Please make one between these times.")
-        }
-        if(errors.length > 0){
-          setReservationsError({message: errors});
-        }else {
-          if(edit) {
-            axios.put(`${API_BASE_URL}/reservations/${reservation.reservation_id}`, {data: formdata})
-          } else {
-            axios.post(`${API_BASE_URL}/reservations`, {data: formdata})
+        try{
+          setErrors(null)
+          if(edit){
+            await axios.put(`${API_BASE_URL}/${reservation.reservation_id}`, {data: formdata});
+          }else{
+            await axios.post(API_BASE_URL, {data: formdata});
           }
-          history.push('/dashboard?date=' + formdata.reservation_date)
-          setFormData(DEFAULT_FORM_STATE)
+          history.push(`/dashboard?date=${formdata.reservation_date}`)
           return () => abortController.abort();
+        }catch(e){
+          setErrors(e.response.data.error)
         }
         
-      }
+      };
     
 
 
@@ -70,35 +57,34 @@ function ReservationsForm({reservation, edit = false}) {
     
       return (
           <main>
-              <h1>Create a Reservation</h1>
-              <ErrorAlert error={reservationsError} />
-        <form onSubmit={createHandler} name="create">
+              <ErrorAlert error={errors} />
+        <form onSubmit={handleSubmit} name="create">
           <table>
             <tbody>
               <tr>
                 <td>
-                  <input required id="first_name" name='first_name' onChange={changeHandler} value={formdata.first_name} placeholder="First Name"/>
+                  <input required className="form-control" id="first_name" name='first_name' onChange={changeHandler} value={formdata.first_name} placeholder="First Name"/>
                 </td>
                 <td>
-                  <input required id="last_name" name='last_name' onChange={changeHandler} value={formdata.last_name} placeholder="Last Name"/>
+                  <input required className="form-control" id="last_name" name='last_name' onChange={changeHandler} value={formdata.last_name} placeholder="Last Name"/>
                 </td>
                 <td>
-                  <input required id="mobile_number" name='mobile_number' onChange={changeHandler} value={formdata.mobile_number} placeholder="Moble Number"/>
+                  <input required className="form-control" id="mobile_number" name='mobile_number' onChange={changeHandler} value={formdata.mobile_number} placeholder="Moble Number"/>
                 </td>
                 <td>
-                  <input required type="date" id="reservation_date" name='reservation_date' onChange={changeHandler} value={formdata.reservation_date} placeholder="Reservation Date"/>
+                  <input required className="form-control" type="date" id="reservation_date" name='reservation_date' onChange={changeHandler} value={formdata.reservation_date} placeholder="Reservation Date"/>
                 </td>
                 <td>
-                  <input required type="time" id="reservation_times" name='reservation_time' onChange={changeHandler} value={formdata.reservation_time} placeholder="Reservation Time"/>
+                  <input required className="form-control" type="time" id="reservation_times" name='reservation_time' onChange={changeHandler} value={formdata.reservation_time} placeholder="Reservation Time"/>
                 </td>
                 <td>
-                  <input required id="people" name='people' onChange={changeHandler} value={formdata.people} placeholder="Guests"/>
+                  <input required className="form-control" type="number" id="people" name='people' onChange={changeHandler} value={formdata.people} placeholder="Guests"/>
                 </td>
                 <td>
-                  <button type="submit">Create</button>
+                  {!edit ? (<button className="btn btn-primary" type="submit">Create</button>) : (<button type="submit" className="btn btn-primary">Submit</button>)}
                 </td>
                 <td>
-                  <button type="button" onClick={() => history.goBack()}>Cancel</button>
+                  <button type="button" className="btn btn-danger" onClick={() => history.goBack()}>Cancel</button>
                 </td>
               </tr>
             </tbody>

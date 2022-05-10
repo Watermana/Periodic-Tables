@@ -12,42 +12,32 @@ async function readRes(reservation_id) {
     return knex("reservations").where({reservation_id}).first();
 }
 
-async function create(table) {
-    return knex("tables")
-        .insert(table);
+async function create(table){
+    return knex("tables as t")
+    .insert(table)
+    .returning("*").then((createdRecord) => createdRecord[0]);
 }
 
-async function seat(table_id, reservation_id) {
-    return knex("tables")
-        .where({table_id})
-        .update({
-            status: "Occupied",
-            reservation_id
-        });
+async function seatTable(table, reservation_id){
+    return knex("reservations as r")
+        .where({"reservation_id": reservation_id})
+        .update({"status": "seated"})
+        .then(() => {
+            return knex("tables as t")
+            .where({"table_id": table})
+            .update({"status": "occupied", "reservation_id": reservation_id});
+        })
 }
 
-async function seatReservation(reservation_id) {
-    return knex("reservations")
-        .where({reservation_id})
-        .update({
-            status: "seated"
-        });
-}
-
-async function unSeat(table_id) {
-    return knex("tables")
-        .where({table_id})
-        .update({
-            status: "Free",
-            reservation_id: null
-        });
-}
-
-async function unSeatReservation(reservation_id) {
-    return knex("reservations")
-        .where({reservation_id})
-        .update({
-            status: "finished"
+async function unseatTable(table_id, reservation_id){
+    return knex("tables as t")
+        .select("*")
+        .where({"table_id": table_id})
+        .update({reservation_id: knex.raw("DEFAULT"), "status": "Free"})
+        .then(() => {
+            return knex("reservations as r")
+            .where({"reservation_id": reservation_id})
+            .update({"status": "finished"})
         });
 }
 
@@ -56,8 +46,6 @@ module.exports = {
     read,
     readRes,
     create,
-    seat,
-    seatReservation,
-    unSeat,
-    unSeatReservation,
+    seatTable,
+    unseatTable,
 }

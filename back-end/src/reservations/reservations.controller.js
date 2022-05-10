@@ -2,8 +2,6 @@
  * List handler for reservation resources
  */
 const service = require("./reservations.service");
-const asnycErrorBoundary = require("../errors/asyncErrorBoundary");
-const { off } = require("../db/connection");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 //middlewares
@@ -90,6 +88,9 @@ function peopleIsNum(req, res, next) {
   if(typeof people !== "number"){
     return next({status: 400, message: "people must be a number."})
   }
+  if(people < 1) {
+    return next({status:400, message: "there must be at least one guest"})
+  }
   return next();
 }
 
@@ -158,11 +159,28 @@ async function list(req, res) {
 }
 
 async function create(req, res, next) {
-  // console.log("I am being pinged", req.body.data)
-  await service.create(req.body.data);
-  res.status(201).json({
-    data: req.body.data,
-  });
+  const {
+    data: {
+      first_name,
+      last_name,
+      mobile_number,
+      people,
+      reservation_date,
+      reservation_time,
+    } = {},
+  } = req.body;
+
+  const newReservation = {
+    first_name,
+    last_name,
+    mobile_number,
+    people,
+    reservation_date,
+    reservation_time,
+  };
+
+  const resp = await service.create(newReservation);
+  res.status(201).json({ data: resp });
 }
 
 async function setStatus(req, res) {
@@ -184,45 +202,45 @@ async function update(req, res) {
 }
 
 module.exports = {
-  list: asnycErrorBoundary(list),
-  read: [asnycErrorBoundary(reservationExists), asnycErrorBoundary(read)],
+  list: asyncErrorBoundary(list),
+  read: [asyncErrorBoundary(reservationExists), asyncErrorBoundary(read)],
   create: [
-    asnycErrorBoundary(bodyDataHas("first_name")),
-    asnycErrorBoundary(bodyDataHas("last_name")),
-    asnycErrorBoundary(bodyDataHas("mobile_number")),
-    asnycErrorBoundary(bodyDataHas("reservation_date")),
-    asnycErrorBoundary(bodyDataHas("reservation_time")),
-    asnycErrorBoundary(bodyDataHas("people")),
-    asnycErrorBoundary(peopleIsNum),
+    asyncErrorBoundary(bodyDataHas("first_name")),
+    asyncErrorBoundary(bodyDataHas("last_name")),
+    asyncErrorBoundary(bodyDataHas("mobile_number")),
+    asyncErrorBoundary(bodyDataHas("reservation_date")),
+    asyncErrorBoundary(bodyDataHas("reservation_time")),
+    asyncErrorBoundary(bodyDataHas("people")),
+    asyncErrorBoundary(peopleIsNum),
     asyncErrorBoundary(dateIsNotDate),
-    asnycErrorBoundary(timeIsTime),
-    asnycErrorBoundary(dateisNotTuesday),
-    asnycErrorBoundary(restarauntIsOpen),
-    asnycErrorBoundary(dateIsFuture),
-    asnycErrorBoundary(statusIsValid),
-    asnycErrorBoundary(create)
+    asyncErrorBoundary(timeIsTime),
+    asyncErrorBoundary(dateisNotTuesday),
+    asyncErrorBoundary(restarauntIsOpen),
+    asyncErrorBoundary(dateIsFuture),
+    asyncErrorBoundary(statusIsValid),
+    asyncErrorBoundary(create)
   ],
   setStatus: [
-    asnycErrorBoundary(bodyDataHas("status")),
-    asnycErrorBoundary(reservationExists),
-    asnycErrorBoundary(statusExists),
-    asnycErrorBoundary(statusNotFinished),
-    asnycErrorBoundary(setStatus)
+    asyncErrorBoundary(bodyDataHas("status")),
+    asyncErrorBoundary(reservationExists),
+    asyncErrorBoundary(statusExists),
+    asyncErrorBoundary(statusNotFinished),
+    asyncErrorBoundary(setStatus)
   ],
   update: [
-    asnycErrorBoundary(reservationExists),
-    asnycErrorBoundary(bodyDataHas("first_name")),
-    asnycErrorBoundary(bodyDataHas("last_name")),
-    asnycErrorBoundary(bodyDataHas("mobile_number")),
-    asnycErrorBoundary(bodyDataHas("reservation_date")),
-    asnycErrorBoundary(bodyDataHas("reservation_time")),
-    asnycErrorBoundary(bodyDataHas("people")),
-    asnycErrorBoundary(peopleIsNum),
+    asyncErrorBoundary(reservationExists),
+    asyncErrorBoundary(bodyDataHas("first_name")),
+    asyncErrorBoundary(bodyDataHas("last_name")),
+    asyncErrorBoundary(bodyDataHas("mobile_number")),
+    asyncErrorBoundary(bodyDataHas("reservation_date")),
+    asyncErrorBoundary(bodyDataHas("reservation_time")),
+    asyncErrorBoundary(bodyDataHas("people")),
+    asyncErrorBoundary(peopleIsNum),
     asyncErrorBoundary(dateIsNotDate),
-    asnycErrorBoundary(timeIsTime),
-    asnycErrorBoundary(dateisNotTuesday),
-    asnycErrorBoundary(restarauntIsOpen),
-    asnycErrorBoundary(dateIsFuture),
-    asnycErrorBoundary(update)
+    asyncErrorBoundary(timeIsTime),
+    asyncErrorBoundary(dateisNotTuesday),
+    asyncErrorBoundary(restarauntIsOpen),
+    asyncErrorBoundary(dateIsFuture),
+    asyncErrorBoundary(update)
   ]
 };
