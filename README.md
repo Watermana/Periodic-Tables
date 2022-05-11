@@ -8,7 +8,7 @@ Users have the ability to create, edit, and cancel restaurant reservations.
 ## Technology Used
  -PostgreSQL
  -React.js
- -Expres.js
+ -Express.js
  -Node.js
  
 ## Screenshots
